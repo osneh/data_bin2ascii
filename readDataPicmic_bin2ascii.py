@@ -12,6 +12,7 @@ import argparse
 import re
 import struct
 from datetime import date,time
+import picmic_modules as prepro
 #from struct import *
 
 headers = ["nbPixels","timeStamp1","timeStamp2","listPixels"]
@@ -110,6 +111,11 @@ def main():
                     
                     RCs= file.read(2*nbPixel)
                     mat = [[int.from_bytes(RCs[2*i+1:2*i+2],'little'),int.from_bytes(RCs[2*i:2*i+1],'little')] for i in range(nbPixel)] 
+                    
+                    for idx in mat:
+                        print(idx)
+                    #new = [] 
+                        
                     numPixelsList.append(nbPixel)
                 
                     timeStampList.append(struct.unpack('<d',timeStamp)[0])
