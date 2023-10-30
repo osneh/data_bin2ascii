@@ -13,7 +13,8 @@ import re
 import struct
 from datetime import date,time
 import picmic_modules as prepro
-#from struct import *
+import csv
+from termcolor import colored
 
 headers = ["nbPixels","timeStamp1","timeStamp2","listPixels"]
 CDW = os.getcwd()   # Actual directory
@@ -41,24 +42,6 @@ def main():
     args, unknown = parser.parse_known_args()
     if not sys.stdin.isatty():
         args.PARAMS.extend(sys.stdin.read().splitlines())
-        #print(args.PARAMS)
-       
-    ##print("$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$")
-    ##print("---- PARAMS", args.PARAMS)
-    ##print("---DIM(PARA)" ,len(args.PARAMS))
-    ##print("#### ARGS ",args)
-    ##print("++++ FILE ",args.file)
-    ##print("@@@@ UNKNOWN",unknown)
-    ##print("!!!! OUTDIR",args.outDir)
-
-
-    #CWD = os.getcwd()
-    #print('CWD',CWD)
-    #print(os.scandir(CWD))
-    
-    #print(args.PARAMS)
-    
-    #return 
      
     # loading the tailed file
     for f in args.PARAMS :
@@ -72,10 +55,11 @@ def main():
         timeStampList = []
         timeStampList2 = []
         
+        testList = []
+        
         inFileName = f.split('/')[-1]
         outFileName = inFileName.replace(".","_")
-    
-        #file = open(inFileName,"rb")
+
         file = open(f,"rb")
     
         ## Reading information from the file comments
@@ -101,29 +85,28 @@ def main():
             timeStamp= file.read(2*4)
             cnt=0
 
-            while cnt<dump:
+            #while cnt<dump:
+            while cnt<100:
                 cnt+=1
                 nbPixel= int.from_bytes(file.read(2),'little')
                 timeStamp2= file.read(2*4)
-                #for ii in range(nbPixel):
+                
                 if nbPixel >0:
-            
-                    
                     RCs= file.read(2*nbPixel)
                     mat = [[int.from_bytes(RCs[2*i+1:2*i+2],'little'),int.from_bytes(RCs[2*i:2*i+1],'little')] for i in range(nbPixel)] 
                     
-                    for idx in mat:
-                        print(idx)
-                    #new = [] 
-                        
+                    ch = [ prepro.getPisteId(idx[1],idx[0]) for idx in mat]
+                    
                     numPixelsList.append(nbPixel)
                 
                     timeStampList.append(struct.unpack('<d',timeStamp)[0])
                     timeStampList2.append(struct.unpack('<d',timeStamp2)[0])
-                    allPixelsList.append(mat)
+                    allPixelsList.append(ch)
+                    
                 
                 else:
                     break
+            break
 
         allData = dumpData(numPixelsList,timeStampList,timeStampList2,allPixelsList)
         myDict = dict(zip(headers,allData))
@@ -142,8 +125,35 @@ def main():
         df2Csv.to_csv(outFileName+'.csv', index=False)
     
         file.close()
-        print('---- FILE : ' +f+ '  already processed')
-    
+        print(colored('---- FILE : ' +f+ '  already processed -----','red'))
+              
+        this_dict = pd.value_counts(np.hstack(df2Csv.listPixels)).to_dict()
+        this_dict.update({'VRefN':df2Csv.VrefN[0]})
+        this_dict = dict(sorted(this_dict.items(),reverse=True)) 
+        
+        # sCurve save data
+        l1 = ''
+        l2 = ''
+        
+        for idx, k in enumerate(this_dict.keys()) :
+            if (idx != len(this_dict.keys() ) -1) :
+                l1 +=k+','        
+                l2+=str(this_dict[k])+','
+            else :
+                l1+=k+'\n'
+                l2+=str(this_dict[k])+'\n'
+                
+        
+        l2write = []
+        l2write.append(l1)
+        l2write.append(l2)
+        
+        with open(outFileName+'_VRefN'+str(df2Csv.VrefN[0])+'.csv','w') as w:
+            for line in l2write :
+                w.write(line)
+        
+        print(20*'-')
+        
     exit()
     
 ##########################################    

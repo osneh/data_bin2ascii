@@ -5,6 +5,7 @@ def getPisteId(m_row,m_col):
     tempdf = pd.read_csv("listWays.csv")
     #print("Row-->",m_row,"Col-->",m_col)
     name =  tempdf['Name'][    (tempdf['Column']==m_col) &  (tempdf['Row']==m_row) ].to_list()  
+    #print(name)
     #print('len name = ', name)
     #id = tempdf.Name.iloc[name].at(0)
     id = "R"+str(m_row)+"-C"+str(m_col)
