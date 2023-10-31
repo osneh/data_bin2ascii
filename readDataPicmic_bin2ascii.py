@@ -54,6 +54,7 @@ def main():
         allPixelsList = []
         timeStampList = []
         timeStampList2 = []
+        cnt=0
         
         testList = []
         
@@ -83,10 +84,10 @@ def main():
         while dump:
             dump =int.from_bytes(file.read(2), 'little') 
             timeStamp= file.read(2*4)
-            cnt=0
+            #cnt+=1
 
-            #while cnt<dump:
-            while cnt<100:
+            while cnt<dump:
+            #while cnt<100:
                 cnt+=1
                 nbPixel= int.from_bytes(file.read(2),'little')
                 timeStamp2= file.read(2*4)
@@ -126,33 +127,51 @@ def main():
     
         file.close()
         print(colored('---- FILE : ' +f+ '  already processed -----','red'))
-              
-        this_dict = pd.value_counts(np.hstack(df2Csv.listPixels)).to_dict()
-        this_dict.update({'VRefN':df2Csv.VrefN[0]})
-        this_dict = dict(sorted(this_dict.items(),reverse=True)) 
         
-        # sCurve save data
-        l1 = ''
-        l2 = ''
         
-        for idx, k in enumerate(this_dict.keys()) :
-            if (idx != len(this_dict.keys() ) -1) :
-                l1 +=k+','        
-                l2+=str(this_dict[k])+','
-            else :
-                l1+=k+'\n'
-                l2+=str(this_dict[k])+'\n'
+        print('dump:',dump,'counter:',cnt)
+        #print('here 1')
+        #print(df2Csv)
+        #print('here 2', len(df2Csv.columns))
+        #print(df2Csv.empty)
+        #print('here 3')
+        if (df2Csv.empty==False):
+            ##print('--------------',pd.value_counts(np.hstack(df2Csv.listPixels)))       
+        #flag_val = pd.value_counts(np.hstack(df2Csv.listPixels))
+        #print('here 2')
+        #print(flag_val)
+        #print('here 3')
+        
+            this_dict = pd.value_counts(np.hstack(df2Csv.listPixels)).to_dict()
+            for k, v in this_dict.items() :
+                this_dict[k]= "{0:.2f}".format(v/cnt)
+            #"{0:03}".format(i) 
+            #this_dict.update({'VRefN':df2Csv.VrefN[0]})
+            this_dict.update({'VRefN':"{0:03}".format(df2Csv.VrefN[0])})
+            this_dict = dict(sorted(this_dict.items(),reverse=True)) 
+        
+            # sCurve save data
+            l1 = ''
+            l2 = ''
+        
+            for idx, k in enumerate(this_dict.keys()) :
+                if (idx != len(this_dict.keys() ) -1) :
+                    l1 +=k+','        
+                    l2+=str(this_dict[k])+','
+                else :
+                    l1+=k+'\n'
+                    l2+=str(this_dict[k])+'\n'
                 
         
-        l2write = []
-        l2write.append(l1)
-        l2write.append(l2)
+            l2write = []
+            l2write.append(l1)
+            l2write.append(l2)
         
-        with open(outFileName+'_VRefN'+str(df2Csv.VrefN[0])+'.csv','w') as w:
-            for line in l2write :
-                w.write(line)
+            with open(outFileName+'_VRefN'+str("{0:03}".format(df2Csv.VrefN[0]))+'.csv','w') as w:
+                for line in l2write :
+                    w.write(line)
         
-        print(20*'-')
+            print(20*'-')
         
     exit()
     
