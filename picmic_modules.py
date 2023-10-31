@@ -44,20 +44,17 @@ def cleanPandaPicmic(mypd, xAxis='VBN_adj') :
     my_df[xAxis] = my_df[xAxis].astype(int)
     return my_df
 
-def dataframe_concat():
-    mylist = []
-    for x in listdir():
-        if x.endswith(".txt") :
-            mylist.append(x)
-    #print(mylist)
+def dataframe_concat(var='VRefN',name='concat_scurves.csv'):
     
-    dflist = []
-    for f in mylist :
-        dflist.append(pd.read_csv(f))
+    mylist = [ x for x in listdir() if x.endswith(".txt") ]    
+    dflist = [pd.read_csv(f) for f in mylist]
     
     pd_concat = pd.concat(dflist)
     pd_concat = pd_concat.fillna(0)
-    pd_concat = pd_concat.sort_values(by=["VRefN"])
-    print(pd_concat)
-    pd_concat.to_csv('concat.csv',index=False)
-    #delete pd_concat 
+    
+    zero = [0 for i in range(len(pd_concat.columns))]
+    zero[0] = pd_concat[var].min()-1
+    
+    pd_concat.loc[-1] = zero
+    pd_concat = pd_concat.sort_values(by=[var])
+    pd_concat.to_csv(name,index=False)
