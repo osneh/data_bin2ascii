@@ -1,4 +1,5 @@
 import pandas as pd
+from os import listdir
 
 def getPisteId(m_row,m_col):
     
@@ -42,3 +43,21 @@ def cleanPandaPicmic(mypd, xAxis='VBN_adj') :
     #my_df = my_df.astype({'VBN_adj':'float','Eff_trig_'+my_way:'float'})
     my_df[xAxis] = my_df[xAxis].astype(int)
     return my_df
+
+def dataframe_concat():
+    mylist = []
+    for x in listdir():
+        if x.endswith(".txt") :
+            mylist.append(x)
+    #print(mylist)
+    
+    dflist = []
+    for f in mylist :
+        dflist.append(pd.read_csv(f))
+    
+    pd_concat = pd.concat(dflist)
+    pd_concat = pd_concat.fillna(0)
+    pd_concat = pd_concat.sort_values(by=["VRefN"])
+    print(pd_concat)
+    pd_concat.to_csv('concat.csv',index=False)
+    #delete pd_concat 
