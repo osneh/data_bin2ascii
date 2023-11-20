@@ -132,10 +132,12 @@ def main():
         
             this_dict = pd.value_counts(np.hstack(df2Csv.listPixels)).to_dict()
             for k, v in this_dict.items() :
-                this_dict[k]= "{0:.2f}".format(v/cnt)
+                this_dict[k]= "{0:.3f}".format(v/cnt)
+                        
                 
             this_dict.update({'VRefN':"{0:03}".format(df2Csv.VrefN[0])})
-            this_dict = dict(sorted(this_dict.items(),reverse=True)) 
+            this_dict = {'VRefN': this_dict.pop('VRefN'), **this_dict}
+            #this_dict = dict(sorted(this_dict.items(),reverse=True)) 
         
             # sCurve save data
             l1 = ''

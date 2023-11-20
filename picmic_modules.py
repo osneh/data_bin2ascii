@@ -42,6 +42,7 @@ def cleanPandaPicmic(mypd, xAxis='VBN_adj') :
     my_df = my_df.tail(-2) # to delete the two first rows
     #my_df = my_df.astype({'VBN_adj':'float','Eff_trig_'+my_way:'float'})
     my_df[xAxis] = my_df[xAxis].astype(int)
+    my_df[mylist] = my_df[mylist].astype(float)
     return my_df
 
 def dataframe_concat(var='VRefN',name='concat_scurves.csv'):
