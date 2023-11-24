@@ -42,7 +42,7 @@ def main():
     args, unknown = parser.parse_known_args()
     if not sys.stdin.isatty():
         args.PARAMS.extend(sys.stdin.read().splitlines())
-     
+
     # loading the tailed file
     for f in args.PARAMS :
         
@@ -91,11 +91,9 @@ def main():
                 cnt+=1
                 nbPixel= int.from_bytes(file.read(2),'little')
                 timeStamp2= file.read(2*4)
-                
                 if nbPixel >0:
                     RCs= file.read(2*nbPixel)
                     mat = [[int.from_bytes(RCs[2*i+1:2*i+2],'little'),int.from_bytes(RCs[2*i:2*i+1],'little')] for i in range(nbPixel)] 
-                    
                     ch = [ prepro.getPisteId(idx[1],idx[0]) for idx in mat]
                     
                     numPixelsList.append(nbPixel)
@@ -123,19 +121,20 @@ def main():
         for key, value in dictNewVars.items():
             df2Csv[key] = value
 
+        df2Csv = df2Csv.iloc[1:]
         df2Csv.to_csv(outFileName+'.csv', index=False)
     
         file.close()
         print(colored('---- FILE : ' +f+ '  already processed -----','red'))
-    
+        
         if (df2Csv.empty==False):
         
             this_dict = pd.value_counts(np.hstack(df2Csv.listPixels)).to_dict()
             for k, v in this_dict.items() :
-                this_dict[k]= "{0:.3f}".format(v/cnt)
-                        
-                
-            this_dict.update({'VRefN':"{0:03}".format(df2Csv.VrefN[0])})
+                this_dict[k]= float("{0:.3f}".format(v/(cnt-1)))
+                                    
+            #this_dict.update({'VRefN':int("{0:03}".format(df2Csv.VrefN[0]))})
+            this_dict.update({'VRefN':int("{0:03}".format(df2Csv.iloc[0]["VrefN"]))})
             this_dict = {'VRefN': this_dict.pop('VRefN'), **this_dict}
             #this_dict = dict(sorted(this_dict.items(),reverse=True)) 
         
@@ -156,7 +155,7 @@ def main():
             l2write.append(l1)
             l2write.append(l2)
         
-            with open(outFileName+'_VRefN'+str("{0:03}".format(df2Csv.VrefN[0]))+'.txt','w') as w:
+            with open(outFileName+'_VRefN'+str("{0:03}".format(df2Csv.iloc[0]["VrefN"]))+'.txt','w') as w:
                 for line in l2write :
                     w.write(line)
         
