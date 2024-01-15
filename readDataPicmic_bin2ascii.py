@@ -29,9 +29,6 @@ def dumpData(list1, list2, list3, list4) :
     myList.append(list4)
     return myList
 
-#########################################
-#def checkDirExists():
-
 ##########################################
 def main():
     
@@ -42,10 +39,11 @@ def main():
     args, unknown = parser.parse_known_args()
     if not sys.stdin.isatty():
         args.PARAMS.extend(sys.stdin.read().splitlines())
-
+     
     # loading the tailed file
     for f in args.PARAMS :
-        
+        #print(20*'-')
+        print(f)
         # variable defintions
         dump =1
         nbPixel=0
@@ -54,12 +52,18 @@ def main():
         allPixelsList = []
         timeStampList = []
         timeStampList2 = []
-        cnt=0
+        totalEvts=0
         
         testList = []
         
-        inFileName = f.split('/')[-1]
+        #inFileName = f.split('/')[-1]
+        inFileName = f.split('/')[0]
+        #print(20*'-')
+        #print(inFileName)
         outFileName = inFileName.replace(".","_")
+        #print(30*'-')
+        #print(outFileName)
+        #exit()
 
         file = open(f,"rb")
     
@@ -80,32 +84,48 @@ def main():
         head=file.readline() # line 4 # === NB_OF_PIXELS_IN_FRAMES (2 bytes) RAW_TIMESTAMP (in fe_clock_periods) (5 Bytes), PIXEL_COLUMN (1 byte), PIXEL ROW ( 1 byte) ==
         head=file.readline() # line 5 #
         head=file.readline() # line 6 #
-    
-        while dump:
+
+        dump_cont = 0 
+        
+        while dump : 
+            
+            dump_cont+=1
+            
             dump =int.from_bytes(file.read(2), 'little') 
             timeStamp= file.read(2*4)
-            #cnt+=1
+            cnt = 0
+            print("---------------- dump :", dump, " ,  dump cont = ", dump_cont)
 
             while cnt<dump:
-            #while cnt<100:
+            #while :
                 cnt+=1
+                totalEvts+=1
                 nbPixel= int.from_bytes(file.read(2),'little')
                 timeStamp2= file.read(2*4)
+                
+                #print('======== nbPixel:', nbPixel)
+                ##print('======== cnt :', cnt)
+                #print(20*'-')
                 if nbPixel >0:
                     RCs= file.read(2*nbPixel)
                     mat = [[int.from_bytes(RCs[2*i+1:2*i+2],'little'),int.from_bytes(RCs[2*i:2*i+1],'little')] for i in range(nbPixel)] 
+                    #print(mat)
+                    #print('-----------------------------------------------------------------')
                     ch = [ prepro.getPisteId(idx[1],idx[0]) for idx in mat]
                     
+                    #print(ch)
+                    #print('-----------------------------------------------------------------')
                     numPixelsList.append(nbPixel)
                 
                     timeStampList.append(struct.unpack('<d',timeStamp)[0])
                     timeStampList2.append(struct.unpack('<d',timeStamp2)[0])
                     allPixelsList.append(ch)
                     
-                
                 else:
                     break
-            break
+            ##break
+            if ( dump_cont == 1 ) :
+                dump = 0
 
         allData = dumpData(numPixelsList,timeStampList,timeStampList2,allPixelsList)
         myDict = dict(zip(headers,allData))
@@ -121,20 +141,22 @@ def main():
         for key, value in dictNewVars.items():
             df2Csv[key] = value
 
-        df2Csv = df2Csv.iloc[1:]
         df2Csv.to_csv(outFileName+'.csv', index=False)
     
         file.close()
         print(colored('---- FILE : ' +f+ '  already processed -----','red'))
-        
+        print(colored('---- FILE : ' +outFileName+'.csv'+ '  created with List of Pixels and time information -----','blue'))
+    
+        ##exit()
+    
         if (df2Csv.empty==False):
         
             this_dict = pd.value_counts(np.hstack(df2Csv.listPixels)).to_dict()
             for k, v in this_dict.items() :
-                this_dict[k]= float("{0:.3f}".format(v/(cnt-1)))
-                                    
-            #this_dict.update({'VRefN':int("{0:03}".format(df2Csv.VrefN[0]))})
-            this_dict.update({'VRefN':int("{0:03}".format(df2Csv.iloc[0]["VrefN"]))})
+                this_dict[k]= "{0:.3f}".format(v/totalEvts)
+                        
+                
+            this_dict.update({'VRefN':"{0:03}".format(df2Csv.VrefN[0])})
             this_dict = {'VRefN': this_dict.pop('VRefN'), **this_dict}
             #this_dict = dict(sorted(this_dict.items(),reverse=True)) 
         
@@ -155,13 +177,16 @@ def main():
             l2write.append(l1)
             l2write.append(l2)
         
-            with open(outFileName+'_VRefN'+str("{0:03}".format(df2Csv.iloc[0]["VrefN"]))+'.txt','w') as w:
+            #with open(outFileName+'_VRefN'+str("{0:03}".format(df2Csv.VrefN[0]))+'.txt','w') as w:
+            with open(outFileName+'.txt','w') as w:
                 for line in l2write :
                     w.write(line)
         
             print(20*'-')
-            
-    prepro.dataframe_concat()
+    
+    ## concat Scurve 
+    nameScurve = outFileName.replace(outFileName.split('_')[-2],"VRefN-SCAN")
+    prepro.dataframe_concat(name=nameScurve+'.csv')
         
     exit()
     

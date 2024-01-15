@@ -3,7 +3,7 @@ from os import listdir
 
 def getPisteId(m_row,m_col):
     
-    tempdf = pd.read_csv("listWays.csv")
+    tempdf = pd.read_csv("/home/habreu/WORK/data_bin2ascii/listWays.csv")
     #print("Row-->",m_row,"Col-->",m_col)
     name =  tempdf['Name'][    (tempdf['Column']==m_col) &  (tempdf['Row']==m_row) ].to_list()  
     #print(name)
