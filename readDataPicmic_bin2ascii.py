@@ -186,8 +186,8 @@ def main():
             print(20*'-')
     
     ## concat Scurve 
-    ##nameScurve = outFileName.replace(outFileName.split('_')[-2],"VRefN-SCAN")
-    ##prepro.dataframe_concat(name=nameScurve+'.csv')
+    nameScurve = outFileName.replace(outFileName.split('_')[-2],"VRefN-SCAN")
+    prepro.dataframe_concat(name=nameScurve+'.csv')
         
     exit()
     

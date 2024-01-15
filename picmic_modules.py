@@ -55,10 +55,21 @@ def dataframe_concat(var='VRefN',name='concat_scurves.csv'):
     
     pd_concat = pd.concat(dflist)
     pd_concat = pd_concat.fillna(0)
-    
-    zero = [0 for i in range(len(pd_concat.columns))]
-    zero[0] = pd_concat[var].min()-1
-    
-    pd_concat.loc[-1] = zero
     pd_concat = pd_concat.sort_values(by=[var])
+   
+    pd_concat.reset_index(drop=True, inplace=True)
+    pd_concat.sort_index(inplace=True)
+
+    lastIndex = pd_concat.idxmax()[var]
+    lastVal = pd_concat[var].min()
+
+    zero = [0 for i in range(len(pd_concat.columns))]
+   
+    for i in range(lastVal):
+        zero[0] = int(i)
+        idx=lastIndex+i
+        pd_concat.loc[idx] = zero 
+  
+    pd_concat = pd_concat.sort_values(by='VRefN')
+    
     pd_concat.to_csv(name,index=False)
