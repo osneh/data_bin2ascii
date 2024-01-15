@@ -111,7 +111,8 @@ def main():
                     mat = [[int.from_bytes(RCs[2*i+1:2*i+2],'little'),int.from_bytes(RCs[2*i:2*i+1],'little')] for i in range(nbPixel)] 
                     #print(mat)
                     #print('-----------------------------------------------------------------')
-                    ch = [ prepro.getPisteId(idx[1],idx[0]) for idx in mat]
+                    ##ch = [ prepro.getPisteId(idx[1],idx[0]) for idx in mat]
+                    ch = [ prepro.getPisteIdRaw(idx[1],idx[0]) for idx in mat]
                     
                     #print(ch)
                     #print('-----------------------------------------------------------------')
@@ -185,8 +186,8 @@ def main():
             print(20*'-')
     
     ## concat Scurve 
-    nameScurve = outFileName.replace(outFileName.split('_')[-2],"VRefN-SCAN")
-    prepro.dataframe_concat(name=nameScurve+'.csv')
+    ##nameScurve = outFileName.replace(outFileName.split('_')[-2],"VRefN-SCAN")
+    ##prepro.dataframe_concat(name=nameScurve+'.csv')
         
     exit()
     

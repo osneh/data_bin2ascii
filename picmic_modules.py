@@ -17,6 +17,9 @@ def getPisteId(m_row,m_col):
     del tempdf
     return id
 
+def getPisteIdRaw(m_row,m_col):
+    id = "R"+str(m_row)+"-C"+str(m_col)
+    return id
 
 def cleanPandaPicmic(mypd, xAxis='VBN_adj') : 
     my_df = mypd.copy()
