@@ -125,8 +125,8 @@ def main():
                 else:
                     break
             ##break
-            if ( dump_cont == 1 ) :
-                dump = 0
+            ## if ( dump_cont == 1 ) :
+            ##     dump = 0
 
         allData = dumpData(numPixelsList,timeStampList,timeStampList2,allPixelsList)
         myDict = dict(zip(headers,allData))
